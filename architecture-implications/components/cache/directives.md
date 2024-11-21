@@ -2,10 +2,6 @@
 
 ## Set cache size
 
-Hint:
-- Docker;
-- PostgreSQL.
-
 ## Dig into cache
 
 How to get into the cache, check which table is there, and is there any dirty buffer ?
@@ -14,7 +10,6 @@ Hint: [pgbuffercache](https://www.postgresql.org/docs/current/pgbuffercache.html
 
 ## Data should be loaded in cache for INSERT, then evicted
 
-How to show that:
 - data from INSERT stays in the cache as long as necessary
 - when data are evicted ?
 
@@ -33,7 +28,6 @@ Bonus: show that even non-commited data are following the same rules.
 
 ### Small tables
 
-Create a table `medium_table`, less that a quarter of the cache.
 SELECT it, check it is completely in the cache.
 
 ### Big table
