@@ -1,0 +1,22 @@
+#set dotenv-filename := env.just
+
+start-instance:
+    docker compose up --detach --renew-anon-volumes --force-recreate --wait
+
+stop-instance:
+    docker compose down
+
+configure-instance:
+    psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
+
+restart-instance:
+    docker compose restart
+
+create-medium-dataset:
+    psql --dbname "$CONNECTION_STRING" --file create-medium-dataset.sql
+
+create-big-dataset:
+    psql --dbname "$CONNECTION_STRING" --file create-big-dataset.sql
+
+create-huge-dataset:
+    psql --dbname "$CONNECTION_STRING" --file create-huge-dataset.sql
