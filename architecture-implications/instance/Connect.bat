@@ -1,0 +1,1 @@
+psql --host=%server% --username=%user% --dbname=%dbname% --port=%port% --password=%password%

@@ -1,4 +1,5 @@
 #set dotenv-filename := env.just
+set shell := ["powershell.exe", "-c"]
 
 start-instance:
     docker compose up --detach --renew-anon-volumes --force-recreate --wait
