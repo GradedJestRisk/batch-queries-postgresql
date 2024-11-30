@@ -1,0 +1,1 @@
+\COPY medium_table TO './medium-table.csv' WITH CSV HEADER;

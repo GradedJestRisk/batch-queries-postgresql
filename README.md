@@ -31,8 +31,9 @@ git rebase origin/main
 If you have PostgreSQL installed locally (as service), stop/deactivate/uninstall it.
 
 Install
+- [curl]()
 - [git](https://git-scm.com/)
-- [docker and docker-compose](https://docs.docker.com/engine/install/)
+- [docker and docker-compose](https://docs.docker.com/engine/install/) > v
 - [psql client](https://askubuntu.com/questions/1040765/how-to-install-psql-without-postgres)
 - [direnv](https://direnv.net/)
 

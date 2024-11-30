@@ -1,0 +1,17 @@
+start-instance:
+    docker compose up --detach --renew-anon-volumes --force-recreate --wait
+
+stop-instance:
+    docker compose down
+
+get-console:
+    psql --dbname "$CONNECTION_STRING"
+
+restart-instance:
+    docker compose restart
+
+load-dump:
+    psql --dbname "$CONNECTION_STRING" --file dump.sql
+
+get-database-size:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"

@@ -1,0 +1,35 @@
+start-instance:
+    cp ./configuration/restricted/.env .env
+    docker compose up --detach --wait
+    docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
+    docker compose restart
+
+start-instance-unrestricted:
+    cp ./configuration/unrestricted/.env .env
+    docker compose up --detach --wait
+    docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
+    docker compose restart
+
+# Does not remove the named volume
+stop-instance:
+    docker compose down
+
+remove-volume:
+    docker volume rm batch-queries-postgresql_postgresql_data
+
+get-console:
+    psql --dbname "$CONNECTION_STRING_FLIGHT"
+
+restart-instance:
+    docker compose restart
+
+download-flight-dataset:
+    curl --output dump.zip https://edu.postgrespro.com/demo-big-en.zip && unzip dump.zip && rm dump.zip && mv demo-big-en-20170815.sql dump.sql
+
+create-flight-dataset:
+    psql --dbname "$CONNECTION_STRING" --file dump.sql
+    psql --dbname "$CONNECTION_STRING" --command="DROP DATABASE IF EXISTS flight;"
+    psql --dbname "$CONNECTION_STRING" --command="ALTER DATABASE demo RENAME TO flight;"
+
+get-database-size:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
