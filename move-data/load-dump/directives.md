@@ -1,6 +1,8 @@
 # Directives
 
-## Load dump
+## Load lightweight dump
+
+### Start database
 
 Start the database.
 ```shell
@@ -12,7 +14,7 @@ Load dump.
 just load-dump
 ```
 
-## Connect
+### Connect
 
 Connect.
 ```shell
@@ -22,10 +24,7 @@ just get-console
 Locate `people` table.
 Why can't you see it ?
 
-
-
-
-## Restart
+### Restart
 
 Stop the database.
 ```shell
@@ -51,4 +50,14 @@ SELECT * FROM people;
 You'll get this message, why ?
 ```
 FATAL:  database "demo" does not exist
+```
+
+## Load flight dump
+
+```shell
+cd implementation
+direnv allow
+just start-instance
+just download-flight-dataset
+just load-dump
 ```

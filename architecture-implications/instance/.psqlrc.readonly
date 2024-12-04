@@ -1,0 +1,12 @@
+\pset null 'NULL'
+SET default_transaction_read_only = ON;
+SET statement_timeout = 60000;
+\set enable_write 'SET default_transaction_read_only = OFF;'
+\set remove_query_timeout 'SET statement_timeout = 0;'
+\set whoami 'WITH info AS ( SELECT CURRENT_USER AS user, CURRENT_DATABASE() AS database, current_setting(\'application_name\') AS application ) SELECT \'You are connected as user \' || info.user || \' on database \'  || info.database || \' with application \' || info.application FROM info;'
+\! clear
+\! echo "Connected to \033[0;32m $APP \033[0m database"
+\echo 'You are restricted to run read-only queries not exceeding 1 minute'
+\echo 'Type :enable_write to issue SELECT/INSERT/UPDATE queries'
+\echo 'Type :remove_query_timeout to let query run as long as necessary'
+\echo 'Type :whoami to get details on current connection'

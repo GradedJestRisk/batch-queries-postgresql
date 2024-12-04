@@ -22,6 +22,11 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '${POSTGRESQL_CPU_COUNT}'
+          memory: ${POSTGRESQL_TOTAL_MEMORY_SIZE}
 
 volumes:
   postgresql_data:
