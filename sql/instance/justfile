@@ -1,3 +1,5 @@
+start-colima:
+     colima start --cpu $COLIMA_CPU --memory $COLIMA_MEMORY
 start-instance:
     cp ./configuration/restricted/.env .env
     docker compose up --detach --wait
