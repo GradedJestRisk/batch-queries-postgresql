@@ -1,6 +1,3 @@
-DROP TABLE IF EXISTS foo;
-CREATE TABLE foo( bar INTEGER );
-INSERT INTO foo SELECT * FROM generate_series(1, 1000000);
 SELECT * FROM foo LIMIT 1;
 SELECT * FROM foo WHERE bar = 45;
 SELECT * FROM foo WHERE bar = 45;
