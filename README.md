@@ -50,6 +50,12 @@ vi ~/.zshrc
 plugins+=(direnv)
 ````
 
+You can skip allowing changes by using `whitelist`.
+```shell
+cp direnv.toml ~/.config/direnv/direnv.toml
+vi ~/.config/direnv/direnv.toml
+```
+
 ## Install extras
 
 Install :
