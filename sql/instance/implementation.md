@@ -550,3 +550,85 @@ WHERE status = 'Scheduled'
 Index Scan
 0
 6 ms
+
+## Tuning
+
+```postgresql
+SHOW max_parallel_workers_per_gather; --4
+SET max_parallel_workers_per_gather = 0;
+SET max_parallel_workers_per_gather = 4;
+```
+
+
+
+Disable seqscan
+```postgresql
+SET enable_seqscan = off;
+```
+
+Enable seqscan
+```postgresql
+SET enable_seqscan = on;
+```
+
+Disable index
+```postgresql
+SET enable_indexscan = off;
+SET enable_indexonlyscan = off;
+SET enable_bitmapscan = off;
+```
+
+Enable index
+```postgresql
+SET enable_indexscan = on;
+SET enable_indexonlyscan = on;
+SET enable_bitmapscan = on;
+```
+
+
+
+Is index in cache ?
+```postgresql
+SELECT
+    c.relkind,
+    c.relname As table,
+    b.isdirty, 
+    count(1) buffer_count,
+    pg_size_pretty(count(*) * 1024 * 8) buffer_size
+FROM pg_class c
+         INNER JOIN pg_buffercache b
+                    ON b.relfilenode = c.relfilenode
+         INNER JOIN pg_database d
+                    ON b.reldatabase = d.oid
+WHERE 1=1
+  AND d.datname = 'flight'
+ -- AND c.relname = 'flights'
+   AND c.relname NOT LIKE 'pg_%'
+GROUP BY c.relkind, c.relname, b.isdirty
+```
+
+```postgresql
+SELECT *
+FROM pg_class
+```
+
+Stats
+```postgresql
+SELECT
+    stt.query,
+    stt.calls,
+    stt.rows,
+    'time:' head,
+    TRUNC(stt.min_exec_time) min,
+    TRUNC(stt.mean_exec_time) mean,
+    TRUNC(stt.max_exec_time) max,
+    stt.shared_blks_hit,
+    stt.shared_blks_read,
+    stt.shared_blks_written,
+    stt.temp_blks_read
+FROM pg_stat_statements stt
+WHERE 1=1
+    AND userid = (SELECT oid FROM pg_roles WHERE rolname = 'user')
+    AND query ILIKE '%flights%'
+ORDER BY max_exec_time DESC
+```

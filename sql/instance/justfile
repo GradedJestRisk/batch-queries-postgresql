@@ -5,6 +5,7 @@ start-instance:
     docker compose up --detach --wait
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
+    psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
 
 start-instance-unrestricted:
     cp ./configuration/unrestricted/.env .env
