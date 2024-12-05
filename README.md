@@ -43,6 +43,8 @@ brew install libpq
 echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
 ```
 
+## direnv
+
 `direnv` can be installed easily with `oh-my-zsh` plugin for `direnv`.
 ````shell
 brew install direnv
@@ -52,9 +54,20 @@ plugins+=(direnv)
 
 You can skip allowing changes by using `whitelist`.
 ```shell
+mkdir ~/.config/direnv
 cp direnv.toml ~/.config/direnv/direnv.toml
 vi ~/.config/direnv/direnv.toml
 ```
+
+## docker-compose
+
+If you get an error message
+```shell
+docker compose up
+`compose` is not a docker command.
+```
+
+Make sure `docker compose` is available by upgrading docker.
 
 ## Install extras
 
