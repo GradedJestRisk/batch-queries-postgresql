@@ -10,8 +10,8 @@ start-instance:
 
 start-instance-unrestricted:
     cp ./configuration/unrestricted/.env .env
-    docker compose up --detach --wait
     docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
+    docker compose up --detach --wait
     docker compose restart
 
 # Does not remove the named volume

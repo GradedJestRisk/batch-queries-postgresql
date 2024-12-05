@@ -40,7 +40,7 @@ Install
 `psql` can be install in MacOS through `libpq`.
 ```shell
 brew install libpq
-echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
+echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> ~/.zshrc
 ```
 
 ## direnv
