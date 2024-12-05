@@ -51,13 +51,3 @@ You'll get this message, why ?
 ```
 FATAL:  database "demo" does not exist
 ```
-
-## Load flight dump
-
-```shell
-cd implementation
-direnv allow
-just start-instance
-just download-flight-dataset
-just load-dump
-```

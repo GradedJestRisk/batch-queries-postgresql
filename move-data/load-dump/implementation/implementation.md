@@ -27,4 +27,4 @@ SELECT * FROM people;
 
 ## Restart
 
-You need to persist data using a volume.
+You need to persist data using a volume, check [docker-compose](../docker-compose.yml).
