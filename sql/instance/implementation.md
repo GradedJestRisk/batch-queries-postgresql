@@ -321,8 +321,6 @@ WHERE f.departure_airport = 'KXK';
 Index Only Scan
 3 - 0.112 ms
 
-
-
 Check statistics
 ```postgresql
 SELECT * 
@@ -446,8 +444,19 @@ Expected = 20 k, actual 0
 
 Update statistics
 ```postgresql
-ANALYZE flights
+ANALYZE VERBOSE flights(departure_airport)
 ```
+
+You'll get :
+- tuple sample count : `150 000 rows in sample`
+- total tuple count: `214 867 estimated total`
+
+```text
+analyzing "bookings.flights"
+"flights": scanned 7868 of 7868 pages, containing 214867 live rows and 0 dead rows; 150000 rows in sample, 214867 estimated total rows
+```
+
+
 
 Check if index is used on 'DME'
 ```postgresql
@@ -586,14 +595,32 @@ Index Scan
 
 Get all queries not finished.
 ```shell
-just get-running-queries
+watch -n 1 just get-running-queries
 ```
 Get all queries, not finished, active.
 ```shell
-just get-running-active-queries
+watch -n 1 just get-running-active-queries
 ```
 
 ## Locks
+
+
+```postgresql
+SELECT pid, mode, locktype, relation::regclass, tuple
+FROM pg_locks
+WHERE granted IS FALSE
+```
+
+```postgresql
+SELECT 16589
+```
+
+```postgresql
+SELECT query, query_start,*
+FROM pg_stat_activity
+WHERE pid=12103
+```
+
 
 ```shell
 just get-locks

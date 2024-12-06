@@ -1,7 +1,8 @@
 SELECT
     pid,
-    query,
+    SUBSTRING(query,1, 50),
     ssn.state,
+    ssn.wait_event_type,
     query_start started_at,
     now() - query_start started_since
 FROM pg_stat_activity ssn
