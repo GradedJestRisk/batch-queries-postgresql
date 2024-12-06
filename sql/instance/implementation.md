@@ -52,6 +52,37 @@ SELECT COUNT(*)
 FROM boarding_passes
 ```
 
+
+## Freeze
+```postgresql
+UPDATE flights SET status = status;
+VACUUM FREEZE VERBOSE flights;
+```
+
+You'll get :
+- count of frozen tuples: `frozen: 2839`;
+- count of index entries removed: `index "status": pages: 520 in total, 328 newly deleted`.
+
+```text
+INFO:  aggressively vacuuming "flight.bookings.flights"
+INFO:  launched 1 parallel vacuum worker for index vacuuming (planned: 1)
+INFO:  table "flights": truncated 10489 to 7868 pages
+INFO:  finished vacuuming "flight.bookings.flights": index scans: 1
+pages: 2621 removed, 7868 remain, 10489 scanned (100.00% of total)
+tuples: 429734 removed, 214867 remain, 0 are dead but not yet removable
+removable cutoff: 1125, which was 1 XIDs old when operation ended
+new relfrozenxid: 1125, which is 108 XIDs ahead of previous value
+frozen: 2839 pages from table (27.07% of total) had 214867 tuples frozen
+index scan needed: 7869 pages from table (75.02% of total) had 644107 dead item identifiers removed
+index "flights_pkey": pages: 1771 in total, 0 newly deleted, 0 currently deleted, 0 reusable
+index "status": pages: 520 in total, 328 newly deleted, 328 currently deleted, 0 reusable
+avg read rate: 5.112 MB/s, avg write rate: 81.828 MB/s
+buffer usage: 35910 hits, 169 misses, 2705 dirtied
+WAL usage: 29105 records, 5214 full page images, 7450558 bytes
+system usage: CPU: user: 0.23 s, system: 0.01 s, elapsed: 0.25 s
+VACUUM
+```
+
 ## Dead tuples
 
 Get dead tuples
