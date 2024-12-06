@@ -1,18 +1,22 @@
 start-colima:
      colima start --cpu $COLIMA_CPU --memory $COLIMA_MEMORY
+
 start-instance:
     cp ./configuration/restricted/.env .env
     docker compose up --detach --wait
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
     psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
-    psql --dbname "$CONNECTION_STRING" --file create-lock-tree-view.sql
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
 
 start-instance-unrestricted:
     cp ./configuration/unrestricted/.env .env
     docker compose up --detach --wait
     docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
+    psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
+
 
 # Does not remove the named volume
 stop-instance:
