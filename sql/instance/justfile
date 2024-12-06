@@ -8,8 +8,9 @@ start-instance:
     docker compose up --detach --wait
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
-    psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
+    psql $env:CONNECTION_STRING_ADMIN --file configure-instance.sql
+    psql $env:CONNECTION_STRING_FLIGHT --file create-lock-tree-view.sql
+
 
 start-instance-unrestricted:
     net stop PostgreSQL-17
@@ -17,8 +18,9 @@ start-instance-unrestricted:
     docker compose up --detach --wait
     docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
-    psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
+    psql $env:CONNECTION_STRING_ADMIN --file configure-instance.sql
+    psql $env:CONNECTION_STRING_FLIGHT --file create-lock-tree-view.sql
+
 
 
 # Does not remove the named volume
@@ -29,7 +31,7 @@ remove-volume:
     docker volume rm batch-queries-postgresql_postgresql_data
 
 get-console:
-    psql $env:CONNECTION_STRING
+    psql $env:CONNECTION_STRING_FLIGHT
 
 restart-instance:
     docker compose restart
@@ -43,14 +45,14 @@ create-flight-dataset:
     psql $env:CONNECTION_STRING  --command="ALTER DATABASE demo RENAME TO flight;"
 
 get-database-size:
-    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
+    psql $env:CONNECTION_STRING --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
 
 get-locks:
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT * FROM blocking_tree;"
+    psql $env:CONNECTION_STRING_FLIGHT --command="SELECT * FROM blocking_tree;"
 
 get-running-queries:
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-queries.sql
+    psql $env:CONNECTION_STRING_FLIGHT --file=get-running-queries.sql
 
 get-running-active-queries:
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-active-queries.sql
+    psql $env:CONNECTION_STRING_FLIGHT --file=get-running-active-queries.sql
     psql $env:CONNECTION_STRING  --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
