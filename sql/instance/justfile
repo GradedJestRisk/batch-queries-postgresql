@@ -6,6 +6,7 @@ start-instance:
     docker compose up --detach --wait
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
+    sleep 2
     psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
     psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
 
@@ -14,6 +15,7 @@ start-instance-unrestricted:
     docker compose up --detach --wait
     docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
+    sleep 2
     psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
     psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
 
