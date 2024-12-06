@@ -13,7 +13,7 @@ psql --dbname $CONNECTION_STRING --command "SELECT pg_sleep(10)"
 
 Check it appears
 ```postgresql
-SELECT pid, query, ssn.state, ssn.backend_type
+SELECT pid, query, ssn.state, ssn.backend_type, query_start, now() - query_start
 FROM pg_stat_activity ssn
 WHERE 1=1
     AND ssn.application_name = 'batch-queries-postgresql'

@@ -6,6 +6,7 @@ start-instance:
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
     docker compose restart
     psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
+    psql --dbname "$CONNECTION_STRING" --file create-lock-tree-view.sql
 
 start-instance-unrestricted:
     cp ./configuration/unrestricted/.env .env
@@ -36,3 +37,12 @@ create-flight-dataset:
 
 get-database-size:
     psql --dbname "$CONNECTION_STRING" --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
+
+get-locks:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT * FROM blocking_tree;"
+
+get-running-queries:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-queries.sql
+
+get-running-active-queries:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-active-queries.sql

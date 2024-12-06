@@ -551,7 +551,25 @@ Index Scan
 0
 6 ms
 
-## Tuning
+## Running queries
+
+Get all queries not finished.
+```shell
+just get-running-queries
+```
+Get all queries, not finished, active.
+```shell
+just get-running-active-queries
+```
+
+## Locks
+
+```shell
+just get-locks
+```
+
+
+## Altering planner
 
 ```postgresql
 SHOW max_parallel_workers_per_gather; --4
