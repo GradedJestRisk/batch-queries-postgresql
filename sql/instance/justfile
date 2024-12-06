@@ -3,6 +3,7 @@ start-colima:
      colima start --cpu $COLIMA_CPU --memory $COLIMA_MEMORY
 
 start-instance:
+    net stop PostgreSQL-17
     cp ./configuration/restricted/.env .env
     docker compose up --detach --wait
     docker cp configuration/restricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
@@ -11,6 +12,7 @@ start-instance:
     psql --dbname "$CONNECTION_STRING_FLIGHT" --file create-lock-tree-view.sql
 
 start-instance-unrestricted:
+    net stop PostgreSQL-17
     cp ./configuration/unrestricted/.env .env
     docker compose up --detach --wait
     docker cp configuration/unrestricted/postgresql.conf batch-queries-postgresql-postgresql-1:/bitnami/postgresql/conf/postgresql.conf
