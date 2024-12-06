@@ -37,6 +37,7 @@ Install
 - [psql client](https://askubuntu.com/questions/1040765/how-to-install-psql-without-postgres)
 - [direnv](https://direnv.net/)
 
+
 `psql` can be install in MacOS through `libpq`.
 ```shell
 brew install libpq
@@ -68,6 +69,14 @@ docker compose up
 ```
 
 Make sure `docker compose` is available by upgrading docker.
+
+
+## MacOS
+
+```shell
+brew install watch
+```
+
 
 ## Install extras
 
