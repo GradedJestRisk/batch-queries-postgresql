@@ -1,0 +1,17 @@
+resize-colima-vm:
+    colima start --memory $COLIMA_MEMORY_GB --cpu $COLIMA_CPU
+
+start-instance:
+    docker compose up --force-recreate --renew-anon-volumes --detach --wait
+
+get-console:
+    psql --dbname "$CONNECTION_STRING"
+
+create-dataset:
+    psql --dbname "$CONNECTION_STRING" --file=create-dataset.sql
+
+query-dataset:
+    psql --dbname "$CONNECTION_STRING" --file=query-dataset.sql
+
+stop-instance:
+    docker compose down
