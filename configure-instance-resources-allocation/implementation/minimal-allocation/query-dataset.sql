@@ -1,0 +1,2 @@
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT MAX(id) FROM big_table;

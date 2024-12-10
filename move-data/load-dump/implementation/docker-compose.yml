@@ -19,9 +19,9 @@ services:
       - 'postgresql_data:/bitnami/postgresql'
     healthcheck:
       test: "psql --dbname \"host=localhost port=${POSTGRESQL_INTERNAL_PORT} dbname=${POSTGRESQL_DATABASE_NAME} user=${POSTGRESQL_USER_NAME} password=${POSTGRESQL_USER_PASSWORD}\""
-      interval: 10s
+      interval: 1s
       timeout: 10s
-      retries: 5
+      retries: 20
     deploy:
       resources:
         limits:

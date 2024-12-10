@@ -52,8 +52,3 @@ get-running-queries:
 
 get-running-active-queries:
     psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-active-queries.sql
-
-install-packages:
-    docker exec --interactive --tty --user=root  batch-queries-postgresql-postgresql-1 bash
-    # apt update
-    # apt install postgresql-15-dirtyread

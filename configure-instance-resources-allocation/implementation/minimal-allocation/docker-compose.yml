@@ -13,21 +13,15 @@ services:
       POSTGRES_PASSWORD: ${POSTGRESQL_USER_PASSWORD}
       POSTGRES_DB: ${POSTGRESQL_DATABASE_NAME}
       POSTGRESQL_POSTGRES_PASSWORD: ${POSTGRESQL_POSTGRES_PASSWORD}
-#    https://www.postgresql.org/docs/current/app-postgres.html
-#    command: postgres -B ${POSTGRESQL_SHARED_BUFFERS_SIZE}
     healthcheck:
       test: "psql --dbname \"host=localhost port=${POSTGRESQL_INTERNAL_PORT} dbname=${POSTGRESQL_DATABASE_NAME} user=${POSTGRESQL_USER_NAME} password=${POSTGRESQL_USER_PASSWORD}\""
       interval: 1s
       timeout: 10s
       retries: 20
     volumes:
-      - 'postgresql_data:/bitnami/postgresql'
+      - ./configuration:/bitnami/postgresql/conf
     deploy:
       resources:
         limits:
           cpus: '${POSTGRESQL_CPU_COUNT}'
           memory: ${POSTGRESQL_TOTAL_MEMORY_SIZE}
-
-volumes:
-  postgresql_data:
-    driver: local
