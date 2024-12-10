@@ -1,0 +1,11 @@
+[pull]
+        rebase = true
+[status]
+        showStash = true
+[push]
+        autoSetupRemote = true
+[rerere]
+        enabled = true
+[rebase]
+        autosquash = true
+        autoStash = true
