@@ -2,7 +2,6 @@ services:
 
   postgresql:
     image: ${POSTGRESQL_IMAGE_NAME}:${POSTGRESQL_IMAGE_VERSION}
-    shm_size: ${POSTGRESQL_SHARED_BUFFERS_SIZE}
     ports:
       - "${POSTGRESQL_EXPOSED_PORT}:${POSTGRESQL_INTERNAL_PORT}"
     environment:
@@ -16,8 +15,3 @@ services:
       retries: 10
     volumes:
       - ./configuration:/bitnami/postgresql/conf
-    deploy:
-      resources:
-        limits:
-          cpus: '${POSTGRESQL_CPU_COUNT}'
-          memory: ${POSTGRESQL_TOTAL_MEMORY_SIZE}
