@@ -155,7 +155,7 @@ docker cp postgresql:/opt/bitnami/postgresql/conf/postgresql.conf .
 
 Change instance configuration and restart :
 - volume in [docker-compose.yml](docker-compose.yml)
-- `log_min_duration_statement`, `log_min_error_statement`,  `log_statement` in [docker-compose.yml](configuration/postgresql.conf)
+- `log_min_duration_statement`, `log_min_error_statement`,  `log_statement` in [postgresql.conf](configuration/postgresql.conf)
 
 Get logs.
 ```shell

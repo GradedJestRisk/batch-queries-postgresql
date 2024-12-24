@@ -98,5 +98,19 @@ docker cp postgresql:/opt/bitnami/postgresql/conf/postgresql.conf .
 
 #### Modify it
 
-Use volume
-https://github.com/bitnami/containers/blob/main/bitnami/postgresql/README.md#configuration-file
+Store the configuration file in a folder, pass it in [a volume](
+https://github.com/bitnami/containers/blob/main/bitnami/postgresql/README.md#configuration-file).
+
+Restart instance.
+
+#### Check it works
+
+Run query
+```postgresql
+SELECT MAX(id) FROM medium_table;
+```
+
+Get logs
+```shell
+docker logs $CONTAINER_NAME
+```

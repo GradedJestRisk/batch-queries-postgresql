@@ -231,6 +231,10 @@ You can keep this instance running, as it is :
 - using a dedicated port `5434`;
 - has an unique name `batch-queries-postgresql-maximal-postgresql-1`.
 
+## Benchmark instances
+
+### Check they're working simultaneously
+
 Check the two instances are running simultaneously
 ```shell
 docker ps --format 'table {{.Names}}\t{{.Status}}'
@@ -242,6 +246,8 @@ NAMES                                           STATUS
 batch-queries-postgresql-maximal-postgresql-1   Up 2 minutes (healthy)
 batch-queries-postgresql-minimal-postgresql-1   Up 11 minutes (healthy)
 ```
+
+### Load data
 
 Load data on both instances, running `stats` when loading
 ```text
@@ -256,6 +262,8 @@ CONTAINER ID   NAME                                            CPU %     MEM USA
 8cc9ca591279   batch-queries-postgresql-maximal-postgresql-1   18.73%    643.4MiB / 31.16GiB   2.02%     16.5kB / 6.75kB   344kB / 4.96GB   7
 975ad2da7ac5   batch-queries-postgresql-minimal-postgresql-1   31.73%    344.3MiB / 1GiB       33.62%    13.6kB / 3.08kB   60.4MB / 3.4GB   7
 ```
+
+### Select data
 
 If you do the same thing getting the maximum id from table
 ```shell
@@ -303,21 +311,31 @@ We can track down differences :
 
 If all table data would fit into the cache (making it smaller), execution time differ even less.
 
-## What does it mean ?
+## What does it mean exactly ?
 
-Memory:
+We can't cover it yet, as it require notions in next modules, but I put here a brief explanation so you can come back here afterward if you're interested.
+
+### Memory 
+
+Settings:
 - `shared_buffers`: datafiles in cache
 - `effective_cache_size`: PostgreSQL cache + OS cache
 
-Disk
+### Disk
+
+Settings:
 - `random_page_cost` : cost to access a block of (4 for hard disks)
 - `effective_io_concurrency` : capacity to return block from different local (2 for hard disks)
 
-Process
+### Processes
+
+Settings:
 - `max_connections` : how many queries can be run simultaneously
 - `work_mem`: size chunk to join dataset, order and group them
 
-Maintenance:
+### Maintenance:
+
+Settings:
 - `maintenance_work_mem`
 - `max_worker_processes`
 - `max_parallel_workers_per_gather`
