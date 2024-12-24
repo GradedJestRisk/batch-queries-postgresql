@@ -6,7 +6,6 @@ services:
 
   postgresql:
     image: ${POSTGRESQL_IMAGE_NAME}:${POSTGRESQL_IMAGE_VERSION}
-    shm_size: ${POSTGRESQL_SHARED_BUFFERS_SIZE}
     ports:
       - "${POSTGRESQL_EXPOSED_PORT}:${POSTGRESQL_INTERNAL_PORT}"
     environment:
