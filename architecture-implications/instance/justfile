@@ -1,5 +1,3 @@
-#set dotenv-filename := env.just
-
 start-instance:
     docker compose up --detach --renew-anon-volumes --force-recreate --wait
     psql --dbname "$CONNECTION_STRING_ADMIN" --file configure-instance.sql
@@ -11,6 +9,9 @@ restart-instance:
     docker compose restart
 
 console:
+   psql --dbname "$CONNECTION_STRING"
+
+console-protected:
    PSQLRC=".psqlrc.readonly" psql --dbname "$CONNECTION_STRING"
 
 create-medium-dataset:
