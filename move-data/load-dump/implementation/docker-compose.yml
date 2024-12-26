@@ -13,8 +13,6 @@ services:
       POSTGRES_PASSWORD: ${POSTGRESQL_USER_PASSWORD}
       POSTGRES_DB: ${POSTGRESQL_DATABASE_NAME}
       POSTGRESQL_POSTGRES_PASSWORD: ${POSTGRESQL_POSTGRES_PASSWORD}
-#    https://www.postgresql.org/docs/current/app-postgres.html
-#    command: postgres -B ${POSTGRESQL_SHARED_BUFFERS_SIZE}
     volumes:
       - 'postgresql_data:/bitnami/postgresql'
     healthcheck:

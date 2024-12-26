@@ -1,0 +1,95 @@
+start-instance:
+    docker compose up --renew-anon-volumes --force-recreate --detach --wait
+    docker exec --interactive --tty --user=root postgresql bash -c "apt update; apt install --assume-yes postgresql-15-dirtyread;"
+    psql --dbname "$CONNECTION_STRING" --file ./scripts/configure-instance.sql
+    psql --dbname "$CONNECTION_STRING" --file ./scripts/create-lock-tree-view.sql
+
+stop-instance:
+    docker compose down
+
+console:
+    psql --dbname "$CONNECTION_STRING"
+
+stats:
+    docker stats
+
+logs:
+    docker logs --follow postgresql
+
+terminal:
+    docker exec --interactive --tty postgresql bash
+
+extract-default-configuration:
+    docker cp postgresql:/usr/share/postgresql/postgresql.conf.sample ./configuration/postgresql.conf.sample
+
+restart-instance:
+    docker compose restart
+
+watch-locks:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --command=\"SELECT * FROM blocking_tree;\""
+
+watch-running-queries:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-running-queries.sql"
+
+watch-maintenance-workers:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-maintenance-workers.sql"
+
+watch-cache:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-cache.sql"
+
+watch-checkpoints:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-checkpoints.sql"
+
+reset-checkpointer-stats:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_stat_reset_shared('bgwriter');"
+
+sleep-for-minute:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_sleep(60)"
+
+create-medium-table:
+    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-medium-table.sql
+
+create-big-table:
+    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-big-table.sql
+
+create-huge-table:
+    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-huge-table.sql
+
+watch-big-table-size-from-fs:
+    watch -n 1 ./scripts/get-big-table-size-fs.sh
+
+watch-big-table-size-from-db:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --command=\"SELECT pg_size_pretty (pg_relation_size ('big_table')) AS big_table_size;\""
+
+select-medium-table:
+    psql --dbname "$CONNECTION_STRING" --command="EXPLAIN (ANALYZE, BUFFERS) SELECT MAX(id) FROM medium_table;"
+
+select-big-table-explain:
+    psql --dbname "$CONNECTION_STRING" --command="EXPLAIN (ANALYZE, BUFFERS) SELECT MAX(id) FROM big_table;"
+
+select-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT MAX(id) FROM big_table;"
+
+update-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE big_table SET id=id+1; COMMIT;"
+
+update-big-table-then-rollback:
+    psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE big_table SET id=id+1; ROLLBACK;"
+
+update-huge-table:
+    psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE huge_table SET id=id+1; COMMIT;"
+
+update-huge-table-then-rollback:
+    psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE huge_table SET id=id+1; ROLLBACK;"
+
+vacuum-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="VACUUM VERBOSE big_table;"
+
+vacuum-full-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="VACUUM FULL VERBOSE big_table;"
+
+watch-tuple-state:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-tuple-state.sql"
+
+checkpoint:
+    psql --dbname "$CONNECTION_STRING" --command="CHECKPOINT;"
