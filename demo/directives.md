@@ -1,122 +1,206 @@
 # Directives
 
-Check configuration has been loaded
-```postgresql
-SHOW shared_buffers 
+## Start and check
+
+```shell
+just start-instance-minimal && just get-cache-size 
 ```
 
-## Find table
+## Observe
 
-```postgresql
-SELECT
-    pg_size_pretty (pg_relation_size ('huge_table'))
+### Basic
+
+Create table and connect to DB
+```shell
+just create-big-table 
+just console
 ```
 
+Execute query
 ```postgresql
-SELECT
-    pg_size_pretty (pg_relation_size ('medium_table'))
+\timing
+SELECT MAX(id) FROM big_table;
 ```
 
-```postgresql
-SELECT
-    pg_size_pretty (pg_relation_size ('big_table'))
+Get logs.
+```shell
+just logs
 ```
 
-346 MB
-
-```postgresql
-SHOW data_directory;
-SELECT setting FROM pg_settings WHERE name = 'data_directory';
-SELECT pg_relation_filepath('medium_table');
-SELECT pg_relation_filepath('big_table');
-```
-
-Command
-```postgresql
-SELECT 'docker exec --tty postgresql bash -c ' || '"' || 'du -sh ' || setting || '/' ||  pg_relation_filepath('big_table') || '"'
-FROM pg_settings WHERE name = 'data_directory';
-```
-
-
-
-Database
-```postgresql
-SELECT *
-FROM pg_database
-WHERE oid IN (16384)
-```
-
-Table
-```postgresql
-SELECT *
-FROM pg_class 
-WHERE oid IN (16384, 16385)
-```
-
+You'll get.
 ```text
-root@845f5da6d8e1:/# ls -ltrah /var/lib/postgresql/data/base/16384/16385
--rw------- 1 postgres postgres 346M Dec 26 10:44 /var/lib/postgresql/data/base/16384/16385
+2024-12-27 15:06:28.651 GMT [49394] LOG:  duration: 1409.123 ms  plan:
+	Query Text: SELECT MAX(id) FROM big_table;
+	Finalize Aggregate  (cost=104015.09..104015.10 rows=1 width=4) (actual time=1396.973..1409.105 rows=1 loops=1)
+	  Output: max(id)
+	  Buffers: shared hit=32131 read=12117 dirtied=32087 written=12053
+	  I/O Timings: shared read=180.152 write=82.324
+	  ->  Gather  (cost=104014.88..104015.08 rows=2 width=4) (actual time=1396.755..1409.068 rows=2 loops=1)
+	        Output: (PARTIAL max(id))
+	        Workers Planned: 2
+	        Workers Launched: 1
+	        Buffers: shared hit=32131 read=12117 dirtied=32087 written=12053
+	        I/O Timings: shared read=180.152 write=82.324
+	        ->  Partial Aggregate  (cost=103014.88..103014.88 rows=1 width=4) (actual time=1381.146..1381.148 rows=1 loops=2)
+	              Output: PARTIAL max(id)
+	              Buffers: shared hit=32131 read=12117 dirtied=32087 written=12053
+	              I/O Timings: shared read=180.152 write=82.324
+	              Worker 0:  actual time=1366.251..1366.253 rows=1 loops=1
+	                JIT:
+	                  Functions: 3
+	                  Options: Inlining false, Optimization false, Expressions true, Deforming true
+	                  Timing: Generation 0.244 ms, Inlining 0.000 ms, Optimization 0.192 ms, Emission 4.046 ms, Total 4.482 ms
+	                Buffers: shared hit=16398 read=6175 dirtied=16288 written=6143
+	                I/O Timings: shared read=74.650 write=48.910
+	              ->  Parallel Seq Scan on public.big_table  (cost=0.00..91261.50 rows=4701350 width=4) (actual time=0.045..881.193 rows=5000000 loops=2)
+	                    Output: id
+	                    Buffers: shared hit=32131 read=12117 dirtied=32087 written=12053
+	                    I/O Timings: shared read=180.152 write=82.324
+	                    Worker 0:  actual time=0.036..854.665 rows=5101498 loops=1
+	                      Buffers: shared hit=16398 read=6175 dirtied=16288 written=6143
+	                      I/O Timings: shared read=74.650 write=48.910
+	JIT:
+	  Functions: 8
+	  Options: Inlining false, Optimization false, Expressions true, Deforming true
+	  Timing: Generation 0.583 ms, Inlining 0.000 ms, Optimization 0.568 ms, Emission 8.160 ms, Total 9.311 ms
+2024-12-27 15:06:28.652 GMT [49394] LOG:  duration: 1440.934 ms
+
 ```
 
-## cache
+### Repeatable
 
+Open
+```shell
+just watch-executed-queries
+just watch-running-queries
+just docker-stats
+```
 
-Table with most cache entries
+Create table
+```shell
+just create-big-table 
+```
+
+Use few connections.
+```shell
+just reset-queries-stats && just select-big-table-on-two-connections
+```
+You'll get a mean value of `0,5s`.
+```text
+           substring           | calls | rows |  head  | min | mean | max
+-------------------------------+-------+------+--------+-----+------+-----
+ SELECT MAX(id) FROM big_table |    60 |   60 | time=> | 415 |  671 | 999
+```
+
+And then
+```text
+just reset-queries-stats && just select-big-table-on-thirty-connections
+```
+
+You'll get a mean value of `9s`, twenty times more
+```text
+             query             | calls | rows |  head  | min  | mean |  max
+-------------------------------+-------+------+--------+------+------+-------
+ SELECT MAX(id) FROM big_table |    60 |   60 | time=> | 2350 | 9090 | 13850
+```
+
+## Versions
+
+### Setup
+
+Create a table
 ```postgresql
-SELECT
-       c.relname table,
-       b.isdirty not_written_on_fs, 
-       count(*)  buffers_count,
-       pg_size_pretty(count(*) * 1024 * 8) buffer_size
-FROM pg_class c
-         INNER JOIN pg_buffercache b
-                    ON b.relfilenode = c.relfilenode
-         INNER JOIN pg_database d
-                    ON b.reldatabase = d.oid
+DROP TABLE IF EXISTS versions;
+CREATE TABLE versions (object_id INTEGER, version_number INTEGER, value TEXT);
+```
+
+Disable auto-vacuum
+```postgresql
+ALTER TABLE versions SET (autovacuum_enabled = off);
+```
+
+### Create a version
+
+Get the transaction id.
+```postgresql
+SELECT txid_current();
+```
+771
+
+Let's create a version of an object.
+```postgresql
+INSERT INTO versions (object_id, version_number, value) 
+VALUES (1, 1, 'a'); 
+```
+
+Get the version, with visibility rules
+```postgresql
+SELECT 
+    'values=>',
+    v.object_id, v.version_number, v.value,
+    'flags=>',
+    ctid, xmin, xmax
+FROM versions v
 WHERE 1=1
-  AND d.datname = 'database'
-  AND c.relname NOT LIKE 'pg_%'
-GROUP BY c.relname, b.isdirty
-ORDER BY 4 DESC
-LIMIT 10;
+    AND v.object_id = 1
+    --AND v.version_number = 1
 ```
 
-## writer
+You see version 1.
 
-Stats
+| ?column? | object_id | version_number | value | ?column? | ctid  | xmin | xmax |
+|:---------|:----------|:---------------|:------|:---------|:------|:-----|:-----|
+| values=> | 1         | 1              | a     | flags=>  | (0,1) | 771  | 0    |
+
+
+### Create another version
+
+Create another version of the same object.
+
+```postgresql
+UPDATE versions 
+SET version_number = 2, value = 'b'
+WHERE object_id=1
+```
+
+Get versions.
+```postgresql
+SELECT 
+    'values=>',
+    v.object_id, v.version_number, v.value,
+    'flags=>',
+    ctid, xmin, xmax
+FROM versions v
+WHERE 1=1
+    AND v.object_id = 1
+    --AND v.version_number = 1
+```
+
+You see version 2 only
+
+| ?column? | object_id | version_number | value | ?column? | ctid  | xmin | xmax |
+|:---------|:----------|:---------------|:------|:---------|:------|:-----|:-----|
+| values=> | 1         | 2              | b     | flags=>  | (0,2) | 761  | 0    |
+
+### See all version
+
+Now use the extension `pg_diryread`
+
 ```postgresql
 SELECT
-    buffers_checkpoint              buffer_checkpointed,
-    TO_CHAR(stats_reset,'HH:MI:SS') stats_since,
-    'pg_stat_bgwriter=>',
-    bg.*
-FROM pg_stat_bgwriter bg
+    'values=>',
+    v.object_id, v.version_number, v.value,
+    'flags=>',
+    v.ctid, v.xmin, v.xmax, v.dead
+FROM pg_dirtyread('versions') 
+    AS v(ctid tid, xmin xid, xmax xid, dead boolean,
+         object_id INTEGER, version_number INTEGER, value TEXT)
+WHERE v.object_id = 1;
 ```
 
-Reset stats
-```postgresql
-SELECT pg_stat_reset_shared('bgwriter');
-```
+You now see the first version, the one you should NOT see according to visibility rules.
 
-```postgresql
-SElect * FROM pg_stat_activity
-```
-
-CHECKPOINT
-
-Force checkpoint (WAL)
-```postgresql
-CHECKPOINT
-```
-
-```postgresql
-SELECT
-total_checkpoints,
-seconds_since_start / total_checkpoints / 60 AS minutes_between_checkpoints
-FROM
-(SELECT
-EXTRACT(EPOCH FROM (now() - pg_postmaster_start_time())) AS seconds_since_start,
-(checkpoints_timed+checkpoints_req) AS total_checkpoints
-FROM pg_stat_bgwriter
-) AS sub;
-```
+| ?column? | object_id | version_number | value | ?column? | ctid  | xmin | xmax | dead  |
+|:---------|:----------|:---------------|:------|:---------|:------|:-----|:-----|:------|
+| values=> | 1         | 1              | a     | flags=>  | (0,1) | 771  | 772  | true  |
+| values=> | 1         | 2              | b     | flags=>  | (0,2) | 772  | 0    | false |

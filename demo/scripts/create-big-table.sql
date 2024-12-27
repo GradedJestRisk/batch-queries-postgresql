@@ -1,4 +1,4 @@
--- 346 Mb, 10 million records
+-- 346 Mb, 10 million records, 10 s
 DROP TABLE IF EXISTS big_table;
 CREATE TABLE big_table( id INTEGER );
 ALTER TABLE big_table SET (autovacuum_enabled = off);

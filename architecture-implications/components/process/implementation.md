@@ -52,9 +52,10 @@ Send SIGKILL signal to the process, using its pid, here 2340:
 kill -s SIGKILL 2340
 ```
 
+
 Check logs
 ```shell
- docker logs $CONTAINER_NAME
+docker logs $CONTAINER_NAME
 ```
 
 You will see the database shut down and went through a recovery

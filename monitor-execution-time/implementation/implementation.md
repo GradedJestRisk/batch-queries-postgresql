@@ -117,21 +117,27 @@ psql --dbname $CONNECTION_STRING --file generate-activity.sql
 Then get results
 ```postgresql
 SELECT 
-    stt.query,
-    stt.calls,
-    stt.rows,
-    'time:' head,
-    TRUNC(stt.min_exec_time) min,
-    TRUNC(stt.mean_exec_time) mean,
-    TRUNC(stt.max_exec_time) max,
-    stt.shared_blks_hit,
-    stt.shared_blks_read,
-    stt.shared_blks_written,
-    stt.temp_blks_read,
-    stt.wal_records    
+     stt.query
+    ,stt.calls
+    ,stt.rows
+    ,'time:' head
+    ,TRUNC(stt.min_exec_time) min
+    ,TRUNC(stt.mean_exec_time) mean
+    ,TRUNC(stt.max_exec_time) max
+    ,stt.shared_blks_hit
+    ,stt.shared_blks_read
+    ,stt.shared_blks_written
+--     ,stt.temp_blks_read
+--     ,stt.wal_records
+     ,'pg_stat_statements=>'
+     ,stt.*
 FROM pg_stat_statements stt
-WHERE stt.query ILIKE '%foo%'
+    INNER JOIN pg_database db ON stt.dbid = db.oid 
+WHERE 1=1
+    AND db.datname = 'database'
+--    AND stt.query ILIKE '%foo%'
 ORDER BY max_exec_time DESC
+LIMIT 5
 ```
 
 ## Execute many queries programmatically

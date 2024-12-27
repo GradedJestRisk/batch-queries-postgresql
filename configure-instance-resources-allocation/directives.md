@@ -54,6 +54,15 @@ Click generate.
 
 You'll get
 ```text
+# https://pgtune.leopard.in.ua
+
+# DB Version: 17
+# OS Type: linux
+# DB Type: dw
+# Total Memory (RAM): 1 GB
+# CPUs num: 2
+# Data Storage: ssd
+
 max_connections = 200
 shared_buffers = 256MB
 effective_cache_size = 768MB

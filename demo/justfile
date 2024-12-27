@@ -1,5 +1,12 @@
-start-instance:
-    docker compose up --renew-anon-volumes --force-recreate --detach --wait
+start-instance-minimal:
+    PG_MODE=minimal POSTGRESQL_CPU_COUNT=2 POSTGRESQL_TOTAL_MEMORY_SIZE=1Gb docker compose up --renew-anon-volumes --force-recreate --detach --wait
+    just configure-instance
+
+start-instance-maximal:
+    PG_MODE=maximal POSTGRESQL_CPU_COUNT=8 POSTGRESQL_TOTAL_MEMORY_SIZE=32Gb docker compose up --renew-anon-volumes --force-recreate --detach --wait
+    just configure-instance
+
+configure-instance:
     docker exec --interactive --tty --user=root postgresql bash -c "apt update; apt install --assume-yes postgresql-15-dirtyread;"
     psql --dbname "$CONNECTION_STRING" --file ./scripts/configure-instance.sql
     psql --dbname "$CONNECTION_STRING" --file ./scripts/create-lock-tree-view.sql
@@ -10,7 +17,7 @@ stop-instance:
 console:
     psql --dbname "$CONNECTION_STRING"
 
-stats:
+docker-stats:
     docker stats
 
 logs:
@@ -34,6 +41,12 @@ watch-running-queries:
 watch-maintenance-workers:
     watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-maintenance-workers.sql"
 
+watch-executed-queries:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-executed-queries.sql"
+
+reset-queries-stats:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT pg_stat_statements_reset();"
+
 watch-cache:
     watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-cache.sql"
 
@@ -47,22 +60,34 @@ sleep-for-minute:
     psql --dbname "$CONNECTION_STRING" --command="SELECT pg_sleep(60)"
 
 create-medium-table:
-    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-medium-table.sql
+    time --format='%e' psql --dbname "$CONNECTION_STRING" --file=./scripts/create-medium-table.sql
 
 create-big-table:
-    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-big-table.sql
+    time --format='%e' psql --dbname "$CONNECTION_STRING" --file=./scripts/create-big-table.sql
 
 create-huge-table:
-    psql --dbname "$CONNECTION_STRING" --file=./scripts/create-huge-table.sql
+    time --format='%e' psql --dbname "$CONNECTION_STRING" --file=./scripts/create-huge-table.sql
+
+watch-medium-table-size-from-fs:
+    watch -n 1 ./scripts/get-medium-table-size-fs.sh
 
 watch-big-table-size-from-fs:
     watch -n 1 ./scripts/get-big-table-size-fs.sh
+
+watch-medium-table-size-from-db:
+    watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --command=\"SELECT pg_size_pretty (pg_relation_size ('medium_table')) AS medium_table_size;\""
 
 watch-big-table-size-from-db:
     watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --command=\"SELECT pg_size_pretty (pg_relation_size ('big_table')) AS big_table_size;\""
 
 select-medium-table:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT MAX(id) FROM medium_table;"
+
+select-medium-table-explain:
     psql --dbname "$CONNECTION_STRING" --command="EXPLAIN (ANALYZE, BUFFERS) SELECT MAX(id) FROM medium_table;"
+
+select-medium-table-many-times:
+    pgbench --client=$CLIENTS --jobs=$JOBS --transactions=$TRANSACTIONS --no-vacuum --progress=5 --file=./scripts/select-medium-table.sql
 
 select-big-table-explain:
     psql --dbname "$CONNECTION_STRING" --command="EXPLAIN (ANALYZE, BUFFERS) SELECT MAX(id) FROM big_table;"
@@ -70,11 +95,20 @@ select-big-table-explain:
 select-big-table:
     psql --dbname "$CONNECTION_STRING" --command="SELECT MAX(id) FROM big_table;"
 
+select-big-table-on-two-connections:
+    time --format='%e' pgbench --client=2 --jobs=$JOBS --transactions=30 --no-vacuum --progress=5 --file=./scripts/select-big-table.sql
+
+select-big-table-on-thirty-connections:
+    time --format='%e' pgbench --client=30 --jobs=$JOBS --transactions=2 --no-vacuum --progress=5 --file=./scripts/select-big-table.sql
+
 update-big-table:
     psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE big_table SET id=id+1; COMMIT;"
 
 update-big-table-then-rollback:
     psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE big_table SET id=id+1; ROLLBACK;"
+
+select-huge-table:
+    psql --dbname "$CONNECTION_STRING" --command="SELECT MAX(id) FROM huge_table;"
 
 update-huge-table:
     psql --dbname "$CONNECTION_STRING" --command="BEGIN TRANSACTION; UPDATE huge_table SET id=id+1; COMMIT;"
@@ -88,8 +122,17 @@ vacuum-big-table:
 vacuum-full-big-table:
     psql --dbname "$CONNECTION_STRING" --command="VACUUM FULL VERBOSE big_table;"
 
+activate-auvacuum-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="ALTER TABLE big_table SET (autovacuum_enabled = on);"
+
+deactivate-auvacuum-big-table:
+    psql --dbname "$CONNECTION_STRING" --command="ALTER TABLE big_table SET (autovacuum_enabled = off);"
+
 watch-tuple-state:
     watch -n 1 "psql --dbname \"$CONNECTION_STRING\" --file=./scripts/get-tuple-state.sql"
 
 checkpoint:
     psql --dbname "$CONNECTION_STRING" --command="CHECKPOINT;"
+
+get-cache-size:
+    psql --dbname "$CONNECTION_STRING" --command="SHOW shared_buffers;"

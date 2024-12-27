@@ -1,11 +1,11 @@
 SELECT
     'Checkpointer:',
-    buffers_checkpoint              buffer_checkpointed,
-    checkpoints_timed timed_count,
-    checkpoints_req   requested_count,
+    buffers_checkpoint  buffer_cnt,
+    checkpoints_timed   timed_cnt,
+    checkpoints_req     requested_cnt,
     'Writer:',
-    buffers_clean,
+    buffers_clean buffer_cnt,
     'Backend:',
-    buffers_backend,
+    buffers_backend buffer_cnt,
     TO_CHAR(stats_reset,'HH:MI:SS') stats_since
 FROM pg_stat_bgwriter bg;

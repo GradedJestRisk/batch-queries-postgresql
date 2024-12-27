@@ -9,7 +9,7 @@ services:
     ports:
       - "${POSTGRESQL_EXPOSED_PORT}:${POSTGRESQL_INTERNAL_PORT}"
     # https://www.postgresql.org/docs/current/app-postgres.html
-    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
+    command: docker-entrypoint.sh -c 'config_file=/etc/postgresql/postgresql.conf'
     environment:
       POSTGRES_USER: ${POSTGRESQL_USER_NAME}
       POSTGRES_PASSWORD: ${POSTGRESQL_USER_PASSWORD}
@@ -20,8 +20,7 @@ services:
       timeout: 10s
       retries: 20
     volumes:
-#      - ./configuration/postgresql.minimal.conf:/etc/postgresql/postgresql.conf
-      - ./configuration/postgresql.maximal.conf:/etc/postgresql/postgresql.conf
+      - ./configuration/postgresql.${PG_MODE}.conf:/etc/postgresql/postgresql.conf
     deploy:
       resources:
         limits:

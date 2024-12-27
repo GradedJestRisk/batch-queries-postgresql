@@ -1,6 +1,6 @@
 SELECT
     c.relname table,
-    b.isdirty to_be_written_on_fs,
+    CASE b.isdirty WHEN true THEN 'to_write' ELSE 'written' END AS state,
     count(*)  buffers_count,
     pg_size_pretty(count(*) * 1024 * 8) buffer_size
 FROM pg_class c
