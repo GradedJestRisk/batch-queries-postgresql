@@ -30,6 +30,9 @@ remove-volume:
 get-console:
     psql --dbname "$CONNECTION_STRING_FLIGHT"
 
+get-console-admin:
+    psql --dbname "$CONNECTION_STRING_ADMIN"
+
 restart-instance:
     docker compose restart
 
@@ -44,16 +47,39 @@ create-flight-dataset:
 get-database-size:
     psql --dbname "$CONNECTION_STRING" --command="SELECT pg_size_pretty(pg_database_size('$POSTGRESQL_DATABASE_NAME'));"
 
+get-table-size:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=scripts/table-size.sql
+
 get-locks:
     psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT * FROM blocking_tree;"
 
 get-running-queries:
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-queries.sql
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=scripts/get-running-queries.sql
 
 get-running-active-queries:
-    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=get-running-active-queries.sql
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=scripts/get-running-active-queries.sql
+
+get-activity:
+    pg_activity "$CONNECTION_STRING_ADMIN"
 
 install-packages:
     docker exec --interactive --tty --user=root  batch-queries-postgresql-postgresql-1 bash
     # apt update
     # apt install postgresql-15-dirtyread
+
+lock-table:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --file=scripts/lock-table-for-a-while.sql
+
+run-short-query:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT * FROM aircrafts LIMIT 1;"
+
+# 3 minutes
+run-long-lasting-query:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT pg_sleep(180);"
+
+# swap may melt your system
+run-everlasting-query:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="SELECT a.total_amount FROM bookings a INNER JOIN bookings b ON a.book_ref <> b.book_ref;"
+
+update-bookings:
+    psql --dbname "$CONNECTION_STRING_FLIGHT" --command="UPDATE bookings SET total_amount = total_amount + 1;"

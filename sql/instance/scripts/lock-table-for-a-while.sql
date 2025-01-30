@@ -1,0 +1,5 @@
+BEGIN;
+    LOCK TABLE aircrafts IN ACCESS EXCLUSIVE MODE;
+    SELECT * FROM bookings LIMIT 1;
+    SELECT pg_sleep(3000);
+COMMIT;

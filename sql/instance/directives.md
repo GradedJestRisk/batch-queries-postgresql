@@ -1,6 +1,8 @@
 # Directives
 
+## Read data model
 
+https://postgrespro.com/docs/postgrespro/15/demodb-schema-objects
 
 ## Load dump
 
