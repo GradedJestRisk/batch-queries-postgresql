@@ -107,6 +107,7 @@ You can skip allowing changes by using `whitelist`.
 mkdir ~/.config/direnv
 cp direnv.toml ~/.config/direnv/direnv.toml
 vi ~/.config/direnv/direnv.toml
+direnv reload
 ```
 
 ### watch
