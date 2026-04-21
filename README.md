@@ -135,6 +135,32 @@ MacOS
 brew install just
 ````
 
+## pgbench
+
+`pgbench` is a load testing tool, shipped along `psql` client.
+
+Make sure it starts.
+```
+pgbench --version
+```
+
+## pgactivity
+
+`pgactivity` is a monitoring tool.
+
+Linux
+```shell
+sudo apt install pg-activity
+```
+
+Make sure it starts
+```shell
+pg_activity --version
+```
+
+[Other platform](https://github.com/dalibo/pg_activity)
+
+
 ## Resources and collaboration
 
 Create a [GitHub](https://github.com/) account.
